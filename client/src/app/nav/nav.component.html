@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-primary">
     <div class="container">
         <a class="navbar-brand" routerLink="/" >Dating App</a>
 
@@ -23,6 +23,10 @@
 
         @if(accountService.currentUser()){
         <div dropdown class="dropdown">
+            <img
+            class="me-3" 
+            src="{{accountService.currentUser()?.photoUrl || './assets/user.png'}}"
+            alt="user main image">
             <a dropdownToggle class="dropdown-toggle text-light text-decoration-none">
                 Welcome {{accountService.currentUser()?.username | titlecase}}
             </a>

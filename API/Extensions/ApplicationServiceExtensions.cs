@@ -1,7 +1,9 @@
 ﻿using API.Business_Layer.Infrastructure;
+using API.Business_Layer.Interfaces;
 using API.Business_Layer.Services;
 using API.Data_Layer;
 using API.Data_Layer.Repositories;
+using API.Helpers;
 using API.Repository_Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,7 +25,9 @@ namespace API.Extensions
             services.AddCors();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IPhotoService, PhotoService>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
 
             return services;
         }

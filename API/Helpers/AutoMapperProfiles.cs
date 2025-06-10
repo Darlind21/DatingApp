@@ -20,6 +20,10 @@ namespace API.Helpers
                 .ForMember(d => d.IsMain, o => o.MapFrom(s => s.IsMainPhoto));
 
             CreateMap<MemberUpdateDTO, AppUser>();
+
+            CreateMap<RegisterDTO, AppUser>();
+            CreateMap<string, DateOnly>()
+                .ConvertUsing(s => DateOnly.Parse(s));
         }
     }
 }

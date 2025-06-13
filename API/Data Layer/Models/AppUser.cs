@@ -1,4 +1,5 @@
-﻿using API.Extensions;
+﻿using API.Data_Layer.Models;
+using API.Extensions;
 using System.ComponentModel.DataAnnotations;
 
 namespace API.Models
@@ -22,6 +23,8 @@ namespace API.Models
         public required string City { get; set; }
         public required string Country { get; set; }
         public List<Photo> Photos { get; set; } = [];
+        public List<UserLike> LikedByUsers { get; set; } = [];
+        public List<UserLike> LikedUsers { get; set; } = [];
 
 
         //It has to have the word "Get" for automapper to work on MemberDTO class to use this method to calculate and then set the age property inside the DTO

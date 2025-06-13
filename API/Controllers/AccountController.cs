@@ -30,22 +30,17 @@ namespace API.Controllers
             user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDTO.Password));
             user.PasswordSalt = hmac.Key;
 
-            //var user = new AppUser
-            //{
-            //    UserName = registerDTO.UserName.ToLower(),
-            //    PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDTO.Password)),
-            //    PasswordSalt = hmac.Key
-            //};
 
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
-            return Ok(new UserDTO
+            return new UserDTO
             {
                 Username = user.UserName,
                 Token = tokenService.CreateToken(user),
-                KnownAs = user.KnownAs
-            });
+                KnownAs = user.KnownAs,
+                Gender = user.Gender
+            };
         }
 
         [HttpPost("login")]
@@ -74,7 +69,8 @@ namespace API.Controllers
                 Username = user.UserName,
                 KnownAs = user.KnownAs,
                 Token = tokenService.CreateToken(user),
-                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMainPhoto)?.Url
+                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMainPhoto)?.Url,
+                Gender = user.Gender
             };
         }
 

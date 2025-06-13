@@ -2,6 +2,7 @@
 using API.Data_Layer;
 using API.Data_Layer.DTOs;
 using API.Extensions;
+using API.Helpers;
 using API.Models;
 using API.Repository_Interfaces;
 using AutoMapper;
@@ -28,9 +29,13 @@ namespace API.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AppUser>>> GetAll()
+        public async Task<ActionResult<IEnumerable<AppUser>>> GetAll([FromQuery]UserParams userParams)
         {
-            var users = await userRepository.GetMembersAsync();
+            userParams.CurrentUsername = User.GetUsername();
+
+            var users = await userRepository.GetMembersAsync(userParams);
+
+            Response.AddPaginationHeader(users);
 
             return Ok(users);
         }

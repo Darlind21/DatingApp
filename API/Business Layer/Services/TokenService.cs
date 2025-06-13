@@ -49,7 +49,8 @@ namespace API.Business_Layer.Services
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.UserName)
+                new (ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new (ClaimTypes.Name, user.UserName)
             };
             //A claim is a piece of info about the user 
             //Claims become part of the payload of the JWT

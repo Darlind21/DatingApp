@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
     standalone: true,
     templateUrl: './register.component.html',
     styleUrl: './register.component.css',
-    imports: [ReactiveFormsModule, NgIf, TextInputComponent, DatePickerComponent]
+    imports: [ReactiveFormsModule, TextInputComponent, DatePickerComponent]
 })
 export class RegisterComponent implements OnInit {
   private accountService = inject(AccountService);

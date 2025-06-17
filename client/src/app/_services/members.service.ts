@@ -37,7 +37,6 @@ export class MembersService {
     params = params.append('gender', this.userParams().gender);
     params = params.append('orderBy', this.userParams().orderBy)
 
-
     return this.http.get<Member[]>(this.baseUrl + 'users', {observe: 'response', params}).subscribe({
       next: response => {
         setPaginatedResponse(response, this.paginatedResult);
@@ -46,14 +45,44 @@ export class MembersService {
     })
   }
 
-  getMemeber(username: string){
-    const member: Member = [... this.memberCache.values()]
-      .reduce((arr, elem) => arr.concat(elem.body), [])
-      .find((m: Member) => m.userName === username);
+  // Fixed method name and logic
+  getMember(username: string){
+    console.log('getMember called with username:', username);
+    console.log('Current cache size:', this.memberCache.size);
+    
+    // Check if we have any cached data
+    if (this.memberCache.size > 0) {
+      console.log('Searching in cache...');
+      
+      // Fixed cache search logic
+      const member: Member | undefined = [...this.memberCache.values()]
+        .reduce((arr: Member[], elem: any) => {
+          // Handle both direct arrays and response objects with body property
+          const members = elem.body ? elem.body : elem;
+          return arr.concat(Array.isArray(members) ? members : []);
+        }, [])
+        .find((m: Member) => m.userName === username);
 
-      if(member) return of(member);
+      console.log('Found member in cache:', member ? 'Yes' : 'No');
+      
+      if (member) {
+        console.log('Returning cached member:', member.knownAs);
+        return of(member);
+      }
+    }
 
-    return this.http.get<Member>(this.baseUrl + 'users/' + username);
+    console.log('Making API call to:', this.baseUrl + 'users/' + username);
+    return this.http.get<Member>(this.baseUrl + 'users/' + username).pipe(
+      tap(member => {
+        console.log('API returned member:', member ? member.knownAs : 'null');
+      })
+    );
+  }
+
+  // Keep the old method name for backward compatibility, but call the fixed one
+  getMemeber(username: string) {
+    console.warn('getMemeber is deprecated, use getMember instead');
+    return this.getMember(username);
   }
 
   updateMember(member: Member){

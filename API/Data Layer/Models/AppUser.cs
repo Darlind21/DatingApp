@@ -25,6 +25,8 @@ namespace API.Models
         public List<Photo> Photos { get; set; } = [];
         public List<UserLike> LikedByUsers { get; set; } = [];
         public List<UserLike> LikedUsers { get; set; } = [];
+        public List<Message> MessagesSent { get; set; } = [];
+        public List<Message> MessagesReceived { get; set; } = [];
 
 
         //It has to have the word "Get" for automapper to work on MemberDTO class to use this method to calculate and then set the age property inside the DTO

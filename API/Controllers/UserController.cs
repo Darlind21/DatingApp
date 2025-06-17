@@ -17,7 +17,7 @@ namespace API.Controllers
     public class UsersController(IUserRepository userRepository, IMapper mapper,
         IPhotoService photoService) : BaseApiController
     {
-        [HttpGet("{username}")] //api/Users/6
+        [HttpGet("{username}")] //api/Users/username
         public async Task<ActionResult<MemberDTO>> GetUserByUsername(string username)
         {
             var user = await userRepository.GetMemberByUsernameAsync(username);

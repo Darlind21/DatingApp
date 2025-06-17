@@ -1,4 +1,5 @@
 ﻿using API.Data_Layer.DTOs;
+using API.Data_Layer.Models;
 using API.Extensions;
 using API.Models;
 using AutoMapper;
@@ -24,6 +25,11 @@ namespace API.Helpers
             CreateMap<RegisterDTO, AppUser>();
             CreateMap<string, DateOnly>()
                 .ConvertUsing(s => DateOnly.Parse(s));
+            CreateMap<Message, MessageDTO>()
+                .ForMember(d => d.SenderPhotoUrl,
+                           o => o.MapFrom(s => s.Sender.Photos.FirstOrDefault(x => x.IsMainPhoto)!.Url))
+                .ForMember(d => d.RecipientPhotoUrl,
+                           o => o.MapFrom(s => s.Recipient.Photos.FirstOrDefault(x => x.IsMainPhoto)!.Url));
         }
     }
 }

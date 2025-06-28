@@ -1,17 +1,13 @@
 ﻿using API.Data_Layer.Models;
 using API.Extensions;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace API.Models
 {
-    public class AppUser
+    public class AppUser : IdentityUser<int> //<int> tells the framework we want the id as int since the default is string 
+        //AppUser will inherit built in props like Id,Username, password hashing etc
     {
-        [Key]
-        public int Id { get; set; }
-        public required string UserName { get; set; }
-        public byte[] PasswordHash { get; set; } = [];
-        public byte[] PasswordSalt { get; set; } = [];
-
         public DateOnly DateOfBirth { get; set; }
         public required string KnownAs { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -27,6 +23,7 @@ namespace API.Models
         public List<UserLike> LikedUsers { get; set; } = [];
         public List<Message> MessagesSent { get; set; } = [];
         public List<Message> MessagesReceived { get; set; } = [];
+        public ICollection<AppUserRole> UserRoles { get; set; } = [];
 
 
         //It has to have the word "Get" for automapper to work on MemberDTO class to use this method to calculate and then set the age property inside the DTO

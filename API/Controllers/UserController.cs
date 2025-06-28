@@ -17,6 +17,7 @@ namespace API.Controllers
     public class UsersController(IUserRepository userRepository, IMapper mapper,
         IPhotoService photoService) : BaseApiController
     {
+
         [HttpGet("{username}")] //api/Users/username
         public async Task<ActionResult<MemberDTO>> GetUserByUsername(string username)
         {
@@ -39,7 +40,6 @@ namespace API.Controllers
 
             return Ok(users);
         }
-
 
 
         [HttpPut]

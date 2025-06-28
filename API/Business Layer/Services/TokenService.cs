@@ -1,5 +1,6 @@
 ﻿using API.Business_Layer.Infrastructure;
 using API.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -22,14 +23,14 @@ namespace API.Business_Layer.Services
     The server parses the JWT, parses the Header and Payload and using the secret key it computes a signature and compares it with the one from the request
         If the signature matches with the one from the token sent access is allowed, otherwise access is not allowed
      */
-    public class TokenService(IConfiguration config) : ITokenService //Dependency injection from primary constructor
+    public class TokenService(IConfiguration config, UserManager<AppUser> userManager) : ITokenService //Dependency injection from primary constructor
         /*
          * IConfiguration is a built in interface to access config data 
          *An IConfiguration object can read configuration settings from different sources e.g appsettings.json (it builds a tree from the file and we can access even nested data)
          * you access it like a dictionary by providing the key e.g config[tokenKey]
          */
     {
-        public string CreateToken(AppUser user)
+        public async Task <string> CreateToken(AppUser user)
         {
             //we get the TokenKey from appsettings.json
             var tokenKey = config["TokenKey"] ??
@@ -47,6 +48,8 @@ namespace API.Business_Layer.Services
             //This byte array is passed to SymmetricSecurityKey constructor
             //A SymmetricSecurityKey obj simply wraps the byte array and provides methods and metadata for cryptographic operations
 
+            if (user.UserName == null) throw new Exception("No username for user!");
+
             var claims = new List<Claim>
             {
                 new (ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -56,6 +59,10 @@ namespace API.Business_Layer.Services
             //Claims become part of the payload of the JWT
             //The Claim class takes 2 parameters ... new Claim (type, value) 
             //  type => what kind of claim it is (NameIdentifier,Email,Role etc.) ...value => the actual data ur assigning to that claim
+
+            var roles = await userManager.GetRolesAsync(user);
+
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
             //this determines how the token is signed

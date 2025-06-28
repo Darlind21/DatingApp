@@ -1,10 +1,13 @@
 using API.Business_Layer.Infrastructure;
 using API.Business_Layer.Services;
 using API.Data_Layer;
+using API.Data_Layer.Models;
 using API.Extensions;
 using API.Middleware;
+using API.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -37,8 +40,10 @@ var services = scope.ServiceProvider;
 try
 {
     var context = services.GetRequiredService<DataDbContext>();
+    var userManager = services.GetRequiredService<UserManager<AppUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
     await context.Database.MigrateAsync();
-    await Seed.SeedUsers(context);
+    await Seed.SeedUsers(userManager, roleManager);
 }
 catch(Exception ex)
 {

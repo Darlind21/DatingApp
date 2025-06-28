@@ -4,6 +4,6 @@ namespace API.Business_Layer.Infrastructure
 {
     public interface ITokenService
     {
-        string CreateToken(AppUser user);
+        Task<string> CreateToken(AppUser user);
     }
 }

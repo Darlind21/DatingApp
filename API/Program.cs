@@ -5,6 +5,7 @@ using API.Data_Layer.Models;
 using API.Extensions;
 using API.Middleware;
 using API.Models;
+using API.SignalR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -25,12 +26,15 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors(x => x
      .AllowAnyHeader()
      .AllowAnyMethod()
+     .AllowCredentials()
      .WithOrigins("http://localhost:4200", "https://localhost:4200")
      );
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<PresenceHub>("hubs/presence");
+app.MapHub<MessageHub>("hubs/message");
 
 
 
@@ -43,6 +47,7 @@ try
     var userManager = services.GetRequiredService<UserManager<AppUser>>();
     var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
     await context.Database.MigrateAsync();
+    await context.Database.ExecuteSqlRawAsync("DELETE FROM [Connections]"); //added so when the app restarts we clear out any connections from the database
     await Seed.SeedUsers(userManager, roleManager);
 }
 catch(Exception ex)

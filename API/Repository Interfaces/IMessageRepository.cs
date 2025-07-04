@@ -12,5 +12,10 @@ namespace API.Repository_Interfaces
         Task<PagedList<MessageDTO>> GetMessageForUser(MessageParams messageParams);
         Task<IEnumerable<MessageDTO>> GetMessageThread(string currentUsername, string recipientUsername);
         Task<bool> SaveAllAsync();
+        void AddGroup(Group group);
+        void RemoveConnection(Connection connection);
+        Task<Connection?> GetConnection(string connectionId);
+        Task<Group?> GetMesssageGroup(string groupName);
+        Task<Group?> GetGroupForConnection(string connectionId);
     }
 }

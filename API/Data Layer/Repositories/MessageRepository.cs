@@ -5,11 +5,18 @@ using API.Repository_Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Connection = API.Data_Layer.Models.Connection;
 
 namespace API.Data_Layer.Repositories
 {
     public class MessageRepository(DataDbContext context, IMapper mapper) : IMessageRepository
     {
+        public void AddGroup(Group group)
+        {
+            context.Groups.Add(group);
+        }
+
         public void AddMessage(Message message)
         {
             context.Messages.Add(message);
@@ -18,6 +25,19 @@ namespace API.Data_Layer.Repositories
         public void DeleteMessage(Message message)
         {
             context.Messages.Remove(message);
+        }
+
+        public async Task<Connection?> GetConnection(string connectionId)
+        {
+            return await context.Connections.FindAsync(connectionId);
+        }
+
+        public async Task<Group?> GetGroupForConnection(string connectionId)
+        {
+            return await context.Groups
+                .Include(x => x.Connections)
+                .Where(x => x.Connections.Any(c => c.ConnectionId == connectionId))
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Message?> GetMessage(int id)
@@ -52,23 +72,20 @@ namespace API.Data_Layer.Repositories
         public async Task<IEnumerable<MessageDTO>> GetMessageThread(string currentUsername, string recipientUsername)
         {
             var messages = await context.Messages
-                .Include(x => x.Sender)
-                .ThenInclude(x => x.Photos)
-                .Include(x => x.Recipient)
-                .ThenInclude(x => x.Photos)
                 .Where(x =>
 
-                x.RecipientUsername == currentUsername 
-                && x.RecipientDeleted == false 
-                && x.SenderUsername == recipientUsername 
+                    x.RecipientUsername == currentUsername 
+                        && x.RecipientDeleted == false 
+                        && x.SenderUsername == recipientUsername 
                 
-                ||
+                    ||
 
-                x.SenderUsername == currentUsername 
-                && x.SenderDeleted == false 
-                && x.RecipientUsername == recipientUsername)
+                    x.SenderUsername == currentUsername 
+                        && x.SenderDeleted == false 
+                        && x.RecipientUsername == recipientUsername)
 
                 .OrderBy(x => x.MessageSent)
+                .ProjectTo<MessageDTO>(mapper.ConfigurationProvider)
                 .ToListAsync();
 
             var unreadMessages = messages
@@ -81,7 +98,19 @@ namespace API.Data_Layer.Repositories
                 await context.SaveChangesAsync();
             }
 
-            return mapper.Map<IEnumerable<MessageDTO>>(messages);
+            return messages;
+        }
+
+        public async Task<Group?> GetMesssageGroup(string groupName)
+        {
+            return await context.Groups
+                .Include(x => x.Connections)
+                .FirstOrDefaultAsync(x => x.Name == groupName);
+        }
+
+        public void RemoveConnection(Connection connection)
+        {
+            context.Connections.Remove(connection);
         }
 
         public async Task<bool> SaveAllAsync()

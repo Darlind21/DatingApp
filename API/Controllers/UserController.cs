@@ -14,14 +14,14 @@ using System.Security.Claims;
 namespace API.Controllers
 {
     [Authorize]
-    public class UsersController(IUserRepository userRepository, IMapper mapper,
+    public class UsersController(IUnitOfWork unitOfWork, IMapper mapper,
         IPhotoService photoService) : BaseApiController
     {
 
         [HttpGet("{username}")] //api/Users/username
         public async Task<ActionResult<MemberDTO>> GetUserByUsername(string username)
         {
-            var user = await userRepository.GetMemberByUsernameAsync(username);
+            var user = await unitOfWork.UserRepository.GetMemberByUsernameAsync(username);
 
             if (user == null) return NotFound();
             
@@ -34,7 +34,7 @@ namespace API.Controllers
         {
             userParams.CurrentUsername = User.GetUsername();
 
-            var users = await userRepository.GetMembersAsync(userParams);
+            var users = await unitOfWork.UserRepository.GetMembersAsync(userParams);
 
             Response.AddPaginationHeader(users);
 
@@ -45,7 +45,7 @@ namespace API.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdateUser(MemberUpdateDTO memberUpdateDTO)
         {
-            var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
             if (user == null) return BadRequest("Could not find user");
 
@@ -53,7 +53,7 @@ namespace API.Controllers
             mapper.Map(memberUpdateDTO, user);
 
             //user will not be able to send a request where no changes have been made in client-side so no point in trying to avoid a BadRequest
-            if (await userRepository.SaveAllAsync()) return NoContent();
+            if (await unitOfWork.Complete()) return NoContent();
             else return BadRequest("User not updated");
         }
 
@@ -61,7 +61,7 @@ namespace API.Controllers
         public async Task<ActionResult<PhotoDTO>> AddPhoto (IFormFile file)// when sending a request(e.g. postman) the key name has match the parameter name
                                                                            // ("file" in this case)(case insensitive)
         {
-            var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
             if (user == null) return BadRequest("Cannot update user!");
 
@@ -79,7 +79,7 @@ namespace API.Controllers
 
             user.Photos.Add(photo);
 
-            if (await userRepository.SaveAllAsync())
+            if (await unitOfWork.Complete())
                 return CreatedAtAction(nameof(GetUserByUsername),
                     new { username = user.UserName }, mapper.Map<PhotoDTO>(photo));
 
@@ -89,7 +89,7 @@ namespace API.Controllers
         [HttpPut("set-main-photo/{photoId}")]
         public async Task<ActionResult> SetMainPhoto([FromRoute(Name = "photoId")]int photoId)
         {
-            var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
             if (user == null) return BadRequest("Could not find user");
 
@@ -103,7 +103,7 @@ namespace API.Controllers
             if (currentMainPhoto != null) currentMainPhoto.IsMainPhoto = false;
             photo.IsMainPhoto = true;
 
-            if (await userRepository.SaveAllAsync()) return NoContent();
+            if (await unitOfWork.Complete()) return NoContent();
 
             return BadRequest("Problem setting main photo");
         }
@@ -111,7 +111,7 @@ namespace API.Controllers
         [HttpDelete("delete-photo/{photoId}")]
         public async Task<ActionResult> DeletePhoto (int photoId)
         {
-            var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
             //The below is to stop compiler from shouting that user may be null
             if (user == null) return BadRequest("User not found!");
@@ -128,7 +128,7 @@ namespace API.Controllers
 
             user.Photos.Remove(photo);
 
-            if (await userRepository.SaveAllAsync()) return Ok();
+            if (await unitOfWork.Complete()) return Ok();
 
             return BadRequest("Problem deleting photo");
         }

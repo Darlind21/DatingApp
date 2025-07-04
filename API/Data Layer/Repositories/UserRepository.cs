@@ -67,11 +67,6 @@ namespace API.Data_Layer.Repositories
                 .ToListAsync();
         }
 
-        public async Task<bool> SaveAllAsync()
-        {
-            return await context.SaveChangesAsync() > 0; //returns the number of changes in the database
-        }
-
         public void Update(AppUser user)
         {
             context.Entry(user).State = EntityState.Modified;

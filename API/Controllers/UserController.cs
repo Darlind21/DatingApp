@@ -32,7 +32,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppUser>>> GetAll([FromQuery]UserParams userParams)
         {
-            userParams.CurrentUsername = User.GetUsername();
+            userParams.CurrentUsername = User.GetUsername().ToLower();
 
             var users = await unitOfWork.UserRepository.GetMembersAsync(userParams);
 

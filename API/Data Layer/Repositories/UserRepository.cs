@@ -25,7 +25,7 @@ namespace API.Data_Layer.Repositories
             var query = context.Users.AsQueryable();
 
             query = query
-                .Where(x => x.UserName != userParams.CurrentUsername);
+                .Where(x => x.UserName != null && x.UserName.ToLower() != userParams.CurrentUsername);
             if (userParams.Gender != null)
             {
                 query = query
